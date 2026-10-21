@@ -6,6 +6,7 @@ import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldContain
 import org.gradle.testkit.runner.GradleRunner
 import org.gradle.testkit.runner.TaskOutcome
+import org.gradle.util.GradleVersion
 import java.io.File
 
 private fun File.write(path: String, content: String) {
@@ -47,20 +48,26 @@ private fun createProject(dir: File): File = dir.apply {
     )
 }
 
+// 対応範囲の Gradle 9 のうち、最も古い版と、このビルドで使っている版
+private val gradleVersions = listOf("9.0.0", GradleVersion.current().version).distinct()
+
 class KontactLensPluginTest :
     FunSpec({
-        test("main ソースセットのソースと mutations.xml から HTML レポートを出力する") {
-            val project = createProject(tempdir())
+        for (gradleVersion in gradleVersions) {
+            test("Gradle $gradleVersion: main ソースセットのソースと mutations.xml から HTML レポートを出力する") {
+                val project = createProject(tempdir())
 
-            val result = GradleRunner.create()
-                .withProjectDir(project)
-                .withPluginClasspath()
-                .withArguments("kontactLensReport")
-                .build()
+                val result = GradleRunner.create()
+                    .withGradleVersion(gradleVersion)
+                    .withProjectDir(project)
+                    .withPluginClasspath()
+                    .withArguments("kontactLensReport")
+                    .build()
 
-            result.task(":kontactLensReport")?.outcome shouldBe TaskOutcome.SUCCESS
-            val html = project.resolve("build/reports/kontactlens/index.html").readText()
-            html shouldContain "\"demo/Calc.java\":["
-            html shouldContain "\"to\":\"        return n * 3;\""
+                result.task(":kontactLensReport")?.outcome shouldBe TaskOutcome.SUCCESS
+                val html = project.resolve("build/reports/kontactlens/index.html").readText()
+                html shouldContain "\"demo/Calc.java\":["
+                html shouldContain "\"to\":\"        return n * 3;\""
+            }
         }
     })

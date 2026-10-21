@@ -34,12 +34,25 @@ dependencies {
 // Kotest runs on the JUnit Platform.
 tasks.test {
     useJUnitPlatform()
+    // Run the tests on another JDK with -PtestJavaVersion=21 (used by the CI matrix).
+    javaLauncher = javaToolchains.launcherFor {
+        languageVersion = providers.gradleProperty("testJavaVersion").map(JavaLanguageVersion::of)
+            .orElse(JavaLanguageVersion.of(17))
+    }
 }
 
-// Apply a specific Java toolchain to ease working on different environments.
+// Supported range: Gradle 9.0+ running on JDK 17+.
+// Build for Java 17, and use the Kotlin API of Gradle 9.0's embedded Kotlin (2.2) because the code runs inside Gradle.
 java {
     toolchain {
-        languageVersion = JavaLanguageVersion.of(21)
+        languageVersion = JavaLanguageVersion.of(17)
+    }
+}
+
+kotlin {
+    compilerOptions {
+        apiVersion = org.jetbrains.kotlin.gradle.dsl.KotlinVersion.KOTLIN_2_2
+        languageVersion = org.jetbrains.kotlin.gradle.dsl.KotlinVersion.KOTLIN_2_2
     }
 }
 
