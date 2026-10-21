@@ -11,7 +11,7 @@ import kotlin.io.path.createTempFile
 import kotlin.io.path.deleteIfExists
 import kotlin.io.path.writeText
 
-// テスト用の XML は、このリポジトリの FizzBuzz のサンプルに PIT 1.30.1 を実行して得たもの
+// テスト用の XML は、samples/kotlin-kotest の FizzBuzz と lib の Library に PIT 1.30.1 を実行して得たもの
 private fun readResource(name: String): List<Mutation> =
     checkNotNull(PitXmlReportTest::class.java.getResourceAsStream("/pit/$name")) { "$name がありません" }
         .use(PitXmlReport::read)

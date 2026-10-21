@@ -13,3 +13,4 @@ plugins {
 
 rootProject.name = "kontact-lens"
 include("lib")
+include("samples:kotlin-kotest", "samples:kotlin-junit", "samples:java-junit")
