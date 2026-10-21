@@ -1,0 +1,34 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: build (JDK ${{ matrix.java }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        # Supported range: JDK 17 and later LTS releases.
+        java: [17, 21, 25]
+    steps:
+      - uses: actions/checkout@v7
+
+      # JDK 17 is the build toolchain. The matrix JDK (listed last) runs Gradle and the tests.
+      - uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: |
+            17
+            ${{ matrix.java }}
+
+      - uses: gradle/actions/setup-gradle@v6
+
+      - name: Build
+        run: ./gradlew build -PtestJavaVersion=${{ matrix.java }}
