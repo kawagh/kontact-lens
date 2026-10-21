@@ -11,8 +11,7 @@ import kotlin.io.path.createTempFile
 import kotlin.io.path.deleteIfExists
 import kotlin.io.path.writeText
 
-// テスト用の XML は、samples/kotlin-kotest の FizzBuzz と、gradle init が生成した Library（現在は削除済み）に
-// PIT 1.30.1 を実行して得たもの
+// テスト用の XML は、samples/kotlin-kotest の FizzBuzz に PIT 1.30.1 を実行して得たもの
 private fun readResource(name: String): List<Mutation> =
     checkNotNull(PitXmlReportTest::class.java.getResourceAsStream("/pit/$name")) { "$name がありません" }
         .use(PitXmlReport::read)
@@ -29,10 +28,10 @@ class PitXmlReportTest :
         test("レポートのすべての変異を書かれた順に読む") {
             val mutations = readResource("mutations.xml")
 
-            mutations shouldHaveSize 11
-            mutations.map { it.sourceFile } shouldBe List(10) { "FizzBuzz.kt" } + "Library.kt"
+            mutations shouldHaveSize 10
+            mutations.map { it.sourceFile } shouldBe List(10) { "FizzBuzz.kt" }
             mutations.groupingBy { it.status }.eachCount() shouldBe
-                mapOf(MutationStatus.KILLED to 9, MutationStatus.SURVIVED to 1, MutationStatus.NO_COVERAGE to 1)
+                mapOf(MutationStatus.KILLED to 8, MutationStatus.SURVIVED to 1, MutationStatus.NO_COVERAGE to 1)
         }
 
         test("Path から読める") {
@@ -49,7 +48,7 @@ class PitXmlReportTest :
                 mutatedClass = "io.github.kawagh.kontactlens.sample.FizzBuzzKt",
                 mutatedMethod = "fizzBuzz",
                 methodDescription = "(I)Ljava/lang/String;",
-                lineNumber = 9,
+                lineNumber = 10,
                 mutator = "org.pitest.mutationtest.engine.gregor.mutators.MathMutator",
                 description = "Replaced integer modulus with multiplication",
                 status = MutationStatus.SURVIVED,
