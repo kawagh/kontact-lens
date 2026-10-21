@@ -12,6 +12,9 @@ plugins {
 
     // Apply the java-library plugin for API and implementation separation.
     `java-library`
+
+    // Apply the PIT plugin for mutation testing.
+    alias(libs.plugins.pitest)
 }
 
 repositories {
@@ -34,4 +37,13 @@ java {
     toolchain {
         languageVersion = JavaLanguageVersion.of(21)
     }
+}
+
+pitest {
+    pitestVersion = libs.versions.pitest.core
+    junit5PluginVersion = libs.versions.pitest.junit5.plugin
+    targetClasses = setOf("io.github.kawagh.kontactlens.*")
+    // kontactLens itself reads the XML report.
+    outputFormats = setOf("XML", "HTML")
+    timestampedReports = false
 }
