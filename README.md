@@ -6,6 +6,27 @@
 - 変異後の行は、PIT の mutator と説明文から推定しています（PIT はソース上の変化を記録しないため）。
 - Kotlin と Java、Kotest と JUnit のプロジェクトに対応しています。
 
+![FizzBuzz のサンプルのレポート。15 の倍数を判定する行で、% を * に変えた変異が SURVIVED、"" を返す変異が NO_COVERAGE になっている](.github/assets/report.png)
+
+<details>
+<summary>Java のプロジェクトのレポート</summary>
+
+![Java で書いた FizzBuzz のサンプルのレポート。Kotlin 版と同じ変異と結果が、Java のソースの上に表示されている](.github/assets/report-java.png)
+
+</details>
+
+## 動作環境
+
+次の組み合わせで動作を確認しています。これより古いバージョンでは確認していません。
+
+| | バージョン |
+| --- | --- |
+| JDK | 21 以上（Gradle を動かす JDK） |
+| Gradle | 9.5.1 |
+| Kotlin | 2.3.20（Kotlin のプロジェクトの場合） |
+| PIT | 1.30.1 |
+| gradle-pitest-plugin | 1.19.0 |
+
 ## 使い方
 
 Gradle プラグインとして使います。PIT（[gradle-pitest-plugin](https://github.com/szpak/gradle-pitest-plugin)）を使っているプロジェクトに、`+` の行を追加します。
@@ -36,6 +57,17 @@ kontactLens は PIT の XML のレポートを読むので、PIT の設定にも
      targetClasses = setOf("com.example.*")
 +    outputFormats = setOf("XML")
 +    timestampedReports = false
+ }
+```
+
+Java のプロジェクトでも、追加する行は同じです。`java` プラグインの `src/main/java` からソースを読みます。
+
+```diff
+ // build.gradle.kts（Java のプロジェクト）
+ plugins {
+     java
+     id("info.solidsoft.pitest") version "1.19.0"
++    id("io.github.kawagh.kontactlens")
  }
 ```
 
