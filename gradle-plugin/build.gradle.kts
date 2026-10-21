@@ -4,6 +4,9 @@ plugins {
     alias(libs.plugins.kotlin.jvm)
     `java-gradle-plugin`
     alias(libs.plugins.detekt)
+
+    // API documentation from KDoc.
+    alias(libs.plugins.dokka)
 }
 
 repositories {

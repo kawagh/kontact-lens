@@ -5,4 +5,21 @@ plugins {
     alias(libs.plugins.kotlin.jvm) apply false
     alias(libs.plugins.pitest) apply false
     alias(libs.plugins.detekt) apply false
+
+    // Aggregates the API documentation of the modules below: ./gradlew dokkaGenerate (build/dokka/html)
+    alias(libs.plugins.dokka)
+}
+
+// Dokka downloads its own components from here.
+repositories {
+    mavenCentral()
+}
+
+dokka {
+    moduleName = "kontactLens"
+}
+
+dependencies {
+    dokka(project(":kontact-lens"))
+    dokka(project(":kontact-lens-gradle-plugin"))
 }

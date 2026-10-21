@@ -11,6 +11,9 @@ plugins {
     alias(libs.plugins.pitest)
 
     alias(libs.plugins.detekt)
+
+    // API documentation from KDoc.
+    alias(libs.plugins.dokka)
 }
 
 repositories {
