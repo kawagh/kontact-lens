@@ -13,4 +13,7 @@ plugins {
 
 rootProject.name = "kontact-lens"
 include("lib", "gradle-plugin")
+// 公開したときの成果物の名前（io.github.kawagh:<名前>）になるので、ディレクトリ名とは別に付ける
+project(":lib").name = "kontact-lens"
+project(":gradle-plugin").name = "kontact-lens-gradle-plugin"
 include("samples:kotlin-kotest", "samples:kotlin-junit", "samples:java-junit")

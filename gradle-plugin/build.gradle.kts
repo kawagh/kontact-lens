@@ -11,7 +11,7 @@ repositories {
 }
 
 dependencies {
-    implementation(project(":lib"))
+    implementation(project(":kontact-lens"))
 
     testImplementation(libs.kotest.runner.junit5)
     testImplementation(libs.kotest.assertions.core)
