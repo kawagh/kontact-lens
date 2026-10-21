@@ -11,7 +11,8 @@ plugins {
     id("org.gradle.toolchains.foojay-resolver-convention") version "1.0.0"
 }
 
-rootProject.name = "kontact-lens"
+// 本体の成果物（:kontact-lens）と group と名前が重なると Gradle が区別できないため、ルートは別の名前にする
+rootProject.name = "kontact-lens-root"
 include("lib", "gradle-plugin")
 // 公開したときの成果物の名前（io.github.kawagh:<名前>）になるので、ディレクトリ名とは別に付ける
 project(":lib").name = "kontact-lens"
