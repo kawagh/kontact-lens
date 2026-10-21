@@ -15,6 +15,8 @@ plugins {
 
     // Apply the PIT plugin for mutation testing.
     alias(libs.plugins.pitest)
+
+    alias(libs.plugins.detekt)
 }
 
 repositories {
@@ -28,6 +30,8 @@ dependencies {
 
     // Lets PIT run Kotest specs and identify each test case.
     pitest(libs.kotest.extensions.pitest)
+
+    detektPlugins(libs.detekt.rules.ktlint.wrapper)
 }
 
 // Kotest runs on the JUnit Platform.
@@ -40,6 +44,12 @@ java {
     toolchain {
         languageVersion = JavaLanguageVersion.of(21)
     }
+}
+
+// Static analysis and formatting (ktlint rules). Format with ./gradlew detekt --auto-correct
+detekt {
+    buildUponDefaultConfig = true
+    config.setFrom(rootProject.file("config/detekt/detekt.yml"))
 }
 
 pitest {

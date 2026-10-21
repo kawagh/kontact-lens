@@ -49,7 +49,8 @@ object HtmlReport {
     // ソースルートからの相対パス（例: io/github/kawagh/kontactlens/sample/FizzBuzz.kt）
     private fun sourcePath(mutation: Mutation): String {
         val packageName = mutation.mutatedClass.substringBeforeLast('.', missingDelimiterValue = "")
-        return if (packageName.isEmpty()) mutation.sourceFile else packageName.replace('.', '/') + "/" + mutation.sourceFile
+        val packageDirectory = packageName.replace('.', '/')
+        return if (packageDirectory.isEmpty()) mutation.sourceFile else "$packageDirectory/${mutation.sourceFile}"
     }
 
     private fun toJson(mutation: Mutation, sources: Map<String, List<String>>): String {

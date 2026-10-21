@@ -3,6 +3,7 @@
 plugins {
     alias(libs.plugins.kotlin.jvm)
     alias(libs.plugins.pitest)
+    alias(libs.plugins.detekt)
 }
 
 repositories {
@@ -13,6 +14,8 @@ dependencies {
     testImplementation(platform(libs.junit.bom))
     testImplementation(libs.junit.jupiter)
     testRuntimeOnly(libs.junit.platform.launcher)
+
+    detektPlugins(libs.detekt.rules.ktlint.wrapper)
 }
 
 tasks.test {
@@ -23,6 +26,12 @@ java {
     toolchain {
         languageVersion = JavaLanguageVersion.of(21)
     }
+}
+
+// Static analysis and formatting (ktlint rules). Format with ./gradlew detekt --auto-correct
+detekt {
+    buildUponDefaultConfig = true
+    config.setFrom(rootProject.file("config/detekt/detekt.yml"))
 }
 
 pitest {

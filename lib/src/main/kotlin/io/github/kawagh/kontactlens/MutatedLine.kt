@@ -11,18 +11,17 @@ package io.github.kawagh.kontactlens
  * @param line 変異した行の、変異前のソース。
  * @return 変異後の行。推定できない mutator や、行に該当する箇所が見つからない場合は `null`。
  */
-fun estimateMutatedLine(mutation: Mutation, line: String): String? =
-    when (mutation.mutator.substringAfterLast('.')) {
-        "MathMutator" -> replaceMathOperator(mutation.description, line)
-        "NegateConditionalsMutator" -> replaceOperator(line, negated)
-        "ConditionalsBoundaryMutator" -> replaceOperator(line, boundaryShifted)
-        "BooleanTrueReturnValsMutator" -> replaceReturnValue(line, "true")
-        "BooleanFalseReturnValsMutator" -> replaceReturnValue(line, "false")
-        "PrimitiveReturnsMutator" -> replaceReturnValue(line, "0")
-        "NullReturnValsMutator" -> replaceReturnValue(line, "null")
-        "EmptyObjectReturnValsMutator" -> emptyValue(mutation)?.let { replaceReturnValue(line, it) }
-        else -> null
-    }
+fun estimateMutatedLine(mutation: Mutation, line: String): String? = when (mutation.mutator.substringAfterLast('.')) {
+    "MathMutator" -> replaceMathOperator(mutation.description, line)
+    "NegateConditionalsMutator" -> replaceOperator(line, negated)
+    "ConditionalsBoundaryMutator" -> replaceOperator(line, boundaryShifted)
+    "BooleanTrueReturnValsMutator" -> replaceReturnValue(line, "true")
+    "BooleanFalseReturnValsMutator" -> replaceReturnValue(line, "false")
+    "PrimitiveReturnsMutator" -> replaceReturnValue(line, "0")
+    "NullReturnValsMutator" -> replaceReturnValue(line, "null")
+    "EmptyObjectReturnValsMutator" -> emptyValue(mutation)?.let { replaceReturnValue(line, it) }
+    else -> null
+}
 
 private val negated = mapOf("==" to "!=", "!=" to "==", "<" to ">=", ">=" to "<", ">" to "<=", "<=" to ">")
 private val boundaryShifted = mapOf("<" to "<=", "<=" to "<", ">" to ">=", ">=" to ">")

@@ -62,10 +62,14 @@ object PitXmlReport {
                     when (val name = reader.localName) {
                         // 子要素を並べるだけの入れ物なので、中身の <index> と <block> で読む
                         "indexes", "blocks" -> Unit
+
                         "index" -> indexes += reader.elementText.trim().toInt()
+
                         "block" -> blocks += reader.elementText.trim().toInt()
+
                         else -> texts[name] = reader.elementText
                     }
+
                 XMLStreamConstants.END_ELEMENT -> if (reader.localName == "mutation") break
             }
         }
@@ -96,9 +100,8 @@ object PitXmlReport {
     private fun XMLStreamReader.requiredAttribute(name: String): String =
         getAttributeValue(null, name) ?: throw IllegalArgumentException("<mutation> に $name 属性がありません")
 
-    private fun parseStatus(value: String): MutationStatus =
-        MutationStatus.entries.find { it.name == value }
-            ?: throw IllegalArgumentException("未知の status です: $value")
+    private fun parseStatus(value: String): MutationStatus = MutationStatus.entries.find { it.name == value }
+        ?: throw IllegalArgumentException("未知の status です: $value")
 
     // 複数のテストは "|" 区切りで 1 つの要素に入っている
     private fun splitTests(value: String?): List<String> = value?.split('|')?.filter { it.isNotEmpty() } ?: emptyList()

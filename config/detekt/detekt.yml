@@ -1,0 +1,6 @@
+# Overrides of the detekt default configuration (buildUponDefaultConfig = true).
+
+style:
+  ReturnCount:
+    # Allow early returns such as `?: return null` at the start of a function.
+    excludeGuardClauses: true

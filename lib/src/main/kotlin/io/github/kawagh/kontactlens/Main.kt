@@ -9,7 +9,7 @@ import kotlin.system.exitProcess
  * 使い方: `<mutations.xml> <出力する HTML> <ソースのディレクトリ>...`
  */
 fun main(args: Array<String>) {
-    if (args.size < 3) {
+    if (args.size < REQUIRED_ARGUMENTS) {
         System.err.println("使い方: <mutations.xml> <出力する HTML> <ソースのディレクトリ>...")
         exitProcess(1)
     }
@@ -19,3 +19,6 @@ fun main(args: Array<String>) {
     HtmlReport.write(PitXmlReport.read(report), sourceRoots, output)
     println("レポートを出力しました: ${output.toAbsolutePath()}")
 }
+
+// mutations.xml、出力する HTML、ソースのディレクトリ（1 つ以上）
+private const val REQUIRED_ARGUMENTS = 3
