@@ -22,14 +22,17 @@ repositories {
     mavenCentral()
 }
 
-testing {
-    suites {
-        // Configure the built-in test suite
-        val test by getting(JvmTestSuite::class) {
-            // Use Kotlin Test test framework
-            useKotlinTest("2.3.20")
-        }
-    }
+dependencies {
+    testImplementation(libs.kotest.runner.junit5)
+    testImplementation(libs.kotest.assertions.core)
+
+    // Lets PIT run Kotest specs and identify each test case.
+    pitest(libs.kotest.extensions.pitest)
+}
+
+// Kotest runs on the JUnit Platform.
+tasks.test {
+    useJUnitPlatform()
 }
 
 // Apply a specific Java toolchain to ease working on different environments.
@@ -41,7 +44,6 @@ java {
 
 pitest {
     pitestVersion = libs.versions.pitest.core
-    junit5PluginVersion = libs.versions.pitest.junit5.plugin
     targetClasses = setOf("io.github.kawagh.kontactlens.*")
     // kontactLens itself reads the XML report.
     outputFormats = setOf("XML", "HTML")
