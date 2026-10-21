@@ -79,6 +79,35 @@ PIT 標準の HTML レポートも出したい場合は、`outputFormats = setOf
 
 `pitest` の後に実行され、`build/reports/kontactlens/index.html` に出力されます。
 
+### テストフレームワークごとの PIT の設定
+
+kontactLens 自体の設定ではありませんが、PIT がテストを実行するには、テストフレームワークに合わせたプラグインが必要です。設定例は [`samples/`](samples) にあります。
+
+JUnit 5 以降（JUnit 6 を含む）の場合:
+
+```diff
+ pitest {
++    junit5PluginVersion = "1.2.3"
+ }
+```
+
+Kotest の場合は、Kotest 公式の PIT プラグインを使います。
+
+```diff
+ dependencies {
++    pitest("io.kotest:kotest-extensions-pitest:6.2.6")
+ }
+```
+
+## 制限
+
+変異後の行は推定なので、次の場合は正しく表示されないことがあります。
+
+- 1 行に同じ演算子が複数あるときは、最初のものが変わったとみなします（例: `a >= 0 && b >= 0`）。
+- 前後に空白の無い演算子（例: `a+b`）は推定しません。
+- 推定に対応していない mutator（`VOID_METHOD_CALLS` など）や、Kotlin の式本体の関数（`fun f() = ...`）の戻り値の変異は、PIT の説明文をそのまま表示します。
+- inline 関数を展開した箇所の変異は、ソースに存在しない行番号になります。これらはファイルの末尾にまとめて表示します。
+
 ## サンプル
 
 `samples/` に、同じ FizzBuzz を Kotlin + Kotest、Kotlin + JUnit、Java + JUnit で書いたプロジェクトがあります。15 の倍数をわざとテストしていないため、SURVIVED と NO_COVERAGE の変異を観察できます。
