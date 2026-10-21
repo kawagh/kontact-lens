@@ -7,6 +7,9 @@ plugins {
 
     // API documentation from KDoc.
     alias(libs.plugins.dokka)
+
+    // Checks the licenses of the runtime dependencies (runs as part of ./gradlew check).
+    alias(libs.plugins.licensee)
 }
 
 repositories {
@@ -62,4 +65,9 @@ kotlin {
 detekt {
     buildUponDefaultConfig = true
     config.setFrom(rootProject.file("config/detekt/detekt.yml"))
+}
+
+// Licenses allowed for the dependencies passed on to users. Kotlin's standard library is Apache-2.0.
+licensee {
+    allow("Apache-2.0")
 }

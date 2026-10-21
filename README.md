@@ -119,7 +119,7 @@ Kotest の場合は、Kotest 公式の PIT プラグインを使います。
 ## 開発
 
 ```sh
-./gradlew build                   # テスト、detekt を含むビルド
+./gradlew build                   # テスト、detekt、依存ライブラリのライセンス検査（Licensee）を含むビルド
 ./gradlew detekt --auto-correct   # コードの整形
 ./gradlew dokkaGenerate           # KDoc から API ドキュメントを生成（build/dokka/html）
 ```

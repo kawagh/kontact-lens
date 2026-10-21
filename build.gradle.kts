@@ -5,6 +5,7 @@ plugins {
     alias(libs.plugins.kotlin.jvm) apply false
     alias(libs.plugins.pitest) apply false
     alias(libs.plugins.detekt) apply false
+    alias(libs.plugins.licensee) apply false
 
     // Aggregates the API documentation of the modules below: ./gradlew dokkaGenerate (build/dokka/html)
     alias(libs.plugins.dokka)
