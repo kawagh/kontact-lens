@@ -49,3 +49,31 @@ pitest {
     outputFormats = setOf("XML", "HTML")
     timestampedReports = false
 }
+
+// Generates kontactLens reports from the PIT results of the samples, e.g. ./gradlew sampleReports
+val sampleReports by tasks.registering {
+    group = "kontactlens"
+    description = "Generates kontactLens reports for all samples."
+}
+
+for (sample in listOf("kotlin-kotest", "kotlin-junit", "java-junit")) {
+    val sampleDir = rootProject.layout.projectDirectory.dir("samples/$sample")
+    val output = layout.buildDirectory.file("reports/kontactlens/$sample.html")
+    val taskName = "sampleReport" + sample.split('-').joinToString("") { it.replaceFirstChar(Char::uppercase) }
+
+    val report = tasks.register<JavaExec>(taskName) {
+        group = "kontactlens"
+        description = "Generates the kontactLens report for samples/$sample."
+        dependsOn(":samples:$sample:pitest")
+        classpath = sourceSets.main.get().runtimeClasspath
+        mainClass = "io.github.kawagh.kontactlens.MainKt"
+        args(
+            sampleDir.file("build/reports/pitest/mutations.xml").asFile.path,
+            output.get().asFile.path,
+            sampleDir.dir("src/main/kotlin").asFile.path,
+            sampleDir.dir("src/main/java").asFile.path,
+        )
+        outputs.file(output)
+    }
+    sampleReports { dependsOn(report) }
+}

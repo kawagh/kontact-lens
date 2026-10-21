@@ -1,0 +1,303 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mutation Report</title>
+<style>
+:root {
+  --bg: #f7f6f3;
+  --surface: #ffffff;
+  --border: #e2ded6;
+  --target: #ebe8e1;
+  --text: #1f1d1a;
+  --muted: #6b665d;
+  --ok: #1f7a4d;
+  --ok-soft: #e3f4ea;
+  --ng: #a16207;
+  --ng-soft: #fdf3cc;
+  --del: #fde8e6;
+  --del-text: #a4262c;
+  --mono: ui-monospace, "JetBrains Mono", "SFMono-Regular", Menlo, Consolas, monospace;
+  --sans: system-ui, -apple-system, "Hiragino Sans", "Noto Sans JP", sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #15141a;
+    --surface: #1d1c23;
+    --border: #34323d;
+    --target: #2b2a33;
+    --text: #ecebf0;
+    --muted: #a09cab;
+    --ok: #5fd39a;
+    --ok-soft: #17301f;
+    --ng: #f2c94c;
+    --ng-soft: #3a3013;
+    --del: #3b1d1f;
+    --del-text: #ff9b9b;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #15141a;
+  --surface: #1d1c23;
+  --border: #34323d;
+  --target: #2b2a33;
+  --text: #ecebf0;
+  --muted: #a09cab;
+  --ok: #5fd39a;
+  --ok-soft: #17301f;
+  --ng: #f2c94c;
+  --ng-soft: #3a3013;
+  --del: #3b1d1f;
+  --del-text: #ff9b9b;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--sans);
+  font-size: 14px;
+  line-height: 1.6;
+}
+.layout { display: grid; grid-template-columns: 260px minmax(0, 1fr); min-height: 100vh; }
+aside { background: var(--surface); border-right: 1px solid var(--border); padding: 20px 12px; }
+main { padding: 20px 24px 48px; }
+.summary { display: flex; align-items: baseline; gap: 10px; margin: 0 4px 16px; color: var(--muted); font-size: 12px; }
+.summary strong { font-size: 28px; line-height: 1; color: var(--text); }
+/* ファイルツリー。1 つしか子を持たないディレクトリは IntelliJ のように 1 行にまとめる */
+.tree { list-style: none; margin: 0; padding: 0; font-family: var(--mono); font-size: 12.5px; }
+.tree ul { list-style: none; margin: 0; padding-left: 14px; }
+.tree .dir { color: var(--muted); padding: 2px 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.tree button {
+  display: flex; align-items: center; gap: 6px; width: 100%; padding: 2px 6px; border: 0; border-radius: 6px;
+  background: none; color: var(--text); font: inherit; text-align: left; cursor: pointer;
+}
+.tree button:hover { background: var(--bg); }
+.tree button[aria-current="true"] { background: var(--bg); font-weight: 700; }
+.tree .tally { margin-left: auto; font-family: var(--sans); font-size: 11px; color: var(--muted); }
+/* 検出できた変異は緑（ok）、検出できなかった変異は黄（ng） */
+.dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; flex: none; }
+.dot.ok { background: var(--ok); }
+.dot.ng { background: var(--ng); }
+.file { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+.file h2 {
+  display: flex; align-items: baseline; gap: 10px; margin: 0; padding: 10px 14px;
+  font-family: var(--mono); font-size: 13px; font-weight: 600; border-bottom: 1px solid var(--border);
+}
+.file h2 span { font-family: var(--sans); font-weight: 400; color: var(--muted); font-size: 12px; }
+.file h2 .toggle-all {
+  margin-left: auto; border: 1px solid var(--border); border-radius: 6px; background: var(--surface);
+  color: var(--muted); font: 12px var(--sans); padding: 1px 10px; cursor: pointer;
+}
+.file h2 .toggle-all:hover { color: var(--text); }
+.note { margin: 0; padding: 10px 14px; color: var(--muted); font-size: 12.5px; border-bottom: 1px solid var(--border); }
+/* 変異のある行は折りたためる。閉じている間は、行末の点で変異の結果だけ見せる */
+.group > summary { list-style: none; cursor: pointer; }
+.group > summary::-webkit-details-marker { display: none; }
+.group > summary:hover { filter: brightness(.97); }
+.group > summary .count::before { content: "▸"; margin-right: 2px; }
+.group[open] > summary .count::before { content: "▾"; }
+.chips { display: inline-flex; gap: 3px; margin-left: 16px; vertical-align: middle; }
+.group[open] .chips { display: none; }
+.code { font-family: var(--mono); font-size: 12.5px; overflow-x: auto; padding: 8px 0; }
+.line { display: grid; grid-template-columns: 3em 1.6em 1fr; white-space: pre; padding-right: 14px; }
+.line .ln { color: var(--muted); text-align: right; padding-right: 8px; }
+.line .count { text-align: center; font-family: var(--sans); font-size: 11px; font-weight: 700; }
+/* 変異の対象になった行。結果ではないので中立の色にする */
+.line.target { background: var(--target); }
+.line.target .count { color: var(--muted); }
+/* 先頭 2 列を .line と同じ幅にして、変異後のコードを元の行と同じ位置にそろえる */
+.muts {
+  display: grid; grid-template-columns: 3em 1.6em minmax(var(--code-width, 0), max-content) auto 1fr; align-items: center;
+  row-gap: 2px; padding: 4px 0 8px;
+}
+/* 変異 1 件ごとの行。subgrid で列をそろえたまま、行全体に背景を付ける */
+.mrow { display: grid; grid-template-columns: subgrid; grid-column: 1 / -1; align-items: center; padding: 1px 14px 1px 0; }
+.mrow.ok { background: color-mix(in srgb, var(--ok-soft) 55%, transparent); }
+.mrow.ng { background: color-mix(in srgb, var(--ng-soft) 55%, transparent); }
+.muts .arrow { color: var(--muted); text-align: center; }
+.badge {
+  justify-self: start; margin-left: 28px; border-radius: 999px; padding: 0 8px;
+  min-width: 11em; text-align: center;
+  font-family: var(--sans); font-size: 11px; font-weight: 700; letter-spacing: .02em;
+}
+.badge.ok { background: var(--ok-soft); color: var(--ok); }
+.badge.ng { background: var(--ng-soft); color: var(--ng); }
+.mutated { white-space: pre; }
+.mutated mark { background: var(--del); color: var(--del-text); border-radius: 3px; padding: 0 2px; }
+/* ソース上の変化を推定できなかった変異は、PIT の説明文をそのまま出す */
+.mutated.nodiff { font-family: var(--sans); color: var(--muted); white-space: normal; }
+.desc { font-family: var(--sans); font-size: 12.5px; color: var(--muted); margin-left: 12px; white-space: nowrap; }
+.desc b { font-weight: 600; color: var(--text); margin-right: 6px; }
+@media (max-width: 760px) {
+  .layout { grid-template-columns: minmax(0, 1fr); }
+  aside { border-right: 0; border-bottom: 1px solid var(--border); padding: 16px; }
+  main { padding: 16px; }
+}
+</style>
+</head>
+<body>
+<div class="layout">
+  <aside>
+    <div class="summary"><strong id="score"></strong><span id="counts"></span></div>
+    <ul class="tree" id="tree"></ul>
+  </aside>
+  <main id="file"></main>
+</div>
+
+<script>
+/*KONTACTLENS_DATA*/
+
+const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
+
+const tone = (m) => (m.detected ? "ok" : "ng");
+const FILES = [...new Set(MUTATIONS.map((m) => m.file))];
+const mutationsOf = (file) => MUTATIONS.filter((m) => m.file === file);
+
+// 状態ごとの件数を「KILLED 9 · SURVIVED 1」のように、件数の多い順に並べる
+function tallyText(muts) {
+  const counts = new Map();
+  for (const m of muts) counts.set(m.status, (counts.get(m.status) ?? 0) + 1);
+  return [...counts].sort((a, b) => b[1] - a[1]).map(([status, n]) => `${status} ${n}`).join(" · ");
+}
+
+const missedCount = (muts) => muts.filter((m) => !m.detected).length;
+
+const detected = MUTATIONS.length - missedCount(MUTATIONS);
+document.getElementById("score").textContent =
+  MUTATIONS.length === 0 ? "-" : `${Math.round((detected / MUTATIONS.length) * 100)}%`;
+document.getElementById("counts").textContent = tallyText(MUTATIONS);
+
+// 元の行と変異後の行をトークン（空白区切り）単位で比べ、共通する前後を除いた「変わった部分」を強調する
+function highlightChange(original, mutated) {
+  const a = original.split(/(\s+)/);
+  const b = mutated.split(/(\s+)/);
+  let head = 0;
+  while (head < a.length && head < b.length && a[head] === b[head]) head++;
+  let tail = 0;
+  while (tail < a.length - head && tail < b.length - head && a[a.length - 1 - tail] === b[b.length - 1 - tail]) tail++;
+  return esc(b.slice(0, head).join("")) +
+    `<mark>${esc(b.slice(head, b.length - tail).join(""))}</mark>` +
+    esc(b.slice(b.length - tail).join(""));
+}
+
+function renderMutation(m, original) {
+  const mutated = m.to !== null && original !== undefined
+    ? `<span class="mutated">${highlightChange(original, m.to)}</span>`
+    : `<span class="mutated nodiff">${esc(m.description)}</span>`;
+  return `<div class="mrow ${tone(m)}"><span></span><span class="arrow">↳</span>
+    ${mutated}
+    <span class="badge ${tone(m)}">${esc(m.status)}</span>
+    <span class="desc"><b>${esc(m.what)}</b>${esc(m.mutator)}</span></div>`;
+}
+
+function renderGroup(label, text, here) {
+  const chips = here.map((m) => `<i class="dot ${tone(m)}" title="${esc(m.status)}"></i>`).join("");
+  return `<details class="group">
+    <summary class="line target"><span class="ln">${label}</span><span class="count">${here.length}</span><span>${esc(text)}<span class="chips">${chips}</span></span></summary>
+    <div class="muts">${here.map((m) => renderMutation(m, text)).join("")}</div>
+  </details>`;
+}
+
+function renderFile(file) {
+  const muts = mutationsOf(file);
+  const source = SOURCES[file];
+  const parts = [];
+  if (source === undefined) {
+    parts.push(`<p class="note">ソースファイルが見つからなかったため、変異の一覧だけを表示しています。</p>`);
+  }
+  const lines = source ?? [];
+  lines.forEach((text, i) => {
+    const ln = i + 1;
+    const here = muts.filter((m) => m.line === ln);
+    parts.push(here.length === 0
+      ? `<div class="line"><span class="ln">${ln}</span><span class="count"></span><span>${esc(text)}</span></div>`
+      : renderGroup(ln, text, here));
+  });
+  // ソースに存在しない行の変異（inline 関数の展開先など）は、行番号ごとにまとめて最後に出す
+  const orphanLines = [...new Set(muts.filter((m) => m.line > lines.length).map((m) => m.line))].sort((a, b) => a - b);
+  if (source !== undefined && orphanLines.length > 0) {
+    parts.push(`<p class="note">以下の行番号はソースファイルに存在しません（inline 関数の展開先などで、Kotlin が割り当てた行番号です）。</p>`);
+  }
+  for (const ln of orphanLines) {
+    parts.push(renderGroup(ln, "", muts.filter((m) => m.line === ln)));
+  }
+  // バッジの位置をファイル内でそろえるため、変異後のコードの列幅を一番長い行に合わせる（強調の余白ぶん少し足す）
+  const codeWidth = Math.max(0, ...muts.map((m) => (m.to ?? "").length)) + 2;
+  return `<section class="file" style="--code-width: ${codeWidth}ch">
+    <h2>${esc(file.split("/").pop())}<span>変異 ${muts.length} 件 · ${tallyText(muts)}</span><button class="toggle-all">すべて開く</button></h2>
+    <div class="code">${parts.join("")}</div>
+  </section>`;
+}
+
+// パスの一覧から入れ子のツリーを作る
+function buildTree(paths) {
+  const root = { dirs: {}, files: [] };
+  for (const p of paths) {
+    const parts = p.split("/");
+    let node = root;
+    for (const d of parts.slice(0, -1)) node = node.dirs[d] ??= { dirs: {}, files: [] };
+    node.files.push(p);
+  }
+  return root;
+}
+
+function renderTree(node) {
+  const dirs = Object.entries(node.dirs).map(([name, child]) => {
+    // ファイルを持たず子ディレクトリが 1 つだけなら、名前をつないで 1 行にする
+    while (child.files.length === 0 && Object.keys(child.dirs).length === 1) {
+      const [next, grand] = Object.entries(child.dirs)[0];
+      name += "/" + next;
+      child = grand;
+    }
+    return `<li><div class="dir">${esc(name)}/</div><ul>${renderTree(child)}</ul></li>`;
+  }).join("");
+  const files = node.files.map((p) => {
+    const muts = mutationsOf(p);
+    const missed = missedCount(muts);
+    // 右端の数字は「検出できなかった変異 / 変異の総数」
+    return `<li><button data-file="${esc(p)}" aria-current="${p === selected}">
+      <span class="dot ${missed > 0 ? "ng" : "ok"}"></span>${esc(p.split("/").pop())}
+      <span class="tally">${missed}/${muts.length}</span></button></li>`;
+  }).join("");
+  return dirs + files;
+}
+
+// 最初は検出できなかった変異があるファイルを開く
+let selected = FILES.find((p) => missedCount(mutationsOf(p)) > 0) ?? FILES[0];
+
+function render() {
+  document.getElementById("tree").innerHTML = renderTree(buildTree(FILES));
+  document.getElementById("file").innerHTML = selected === undefined
+    ? `<p class="note">変異がありません。</p>`
+    : renderFile(selected);
+}
+
+// 「すべて開く／閉じる」。1 つでも閉じた行があれば全部開き、全部開いていれば全部閉じる
+document.getElementById("file").addEventListener("click", (e) => {
+  if (!e.target.closest(".toggle-all")) return;
+  const groups = [...document.querySelectorAll("#file .group")];
+  const open = groups.some((g) => !g.open);
+  groups.forEach((g) => { g.open = open; });
+});
+
+// 行を個別に開閉したときもボタンの文言を合わせる（toggle は伝播しないので capture で拾う）
+document.addEventListener("toggle", () => {
+  const button = document.querySelector("#file .toggle-all");
+  if (!button) return;
+  const allOpen = [...document.querySelectorAll("#file .group")].every((g) => g.open);
+  button.textContent = allOpen ? "すべて閉じる" : "すべて開く";
+}, true);
+
+document.getElementById("tree").addEventListener("click", (e) => {
+  const button = e.target.closest("[data-file]");
+  if (!button) return;
+  selected = button.dataset.file;
+  render();
+});
+
+render();
+</script>
+</body>
+</html>
