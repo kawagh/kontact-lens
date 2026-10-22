@@ -18,6 +18,7 @@ kotest-extensions-pitest = { module = "io.kotest:kotest-extensions-pitest", vers
 kotest-runner-junit5 = { module = "io.kotest:kotest-runner-junit5", version.ref = "kotest" }
 
 [plugins]
+licensee = { id = "app.cash.licensee", version = "1.14.1" }
 dokka = { id = "org.jetbrains.dokka", version = "2.2.0" }
 detekt = { id = "dev.detekt", version.ref = "detekt" }
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version = "2.3.20" }
